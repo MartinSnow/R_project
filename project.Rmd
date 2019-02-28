@@ -1,0 +1,295 @@
+---
+title: "RedWine"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+## 载入数据集，并查看数据集的相关信息
+```{r}
+?wineQualityReds
+pf = read.csv('wineQualityReds.csv')
+str(pf)
+summary(pf)
+```
+该数据集共有13个变量，1599条记录。其中`X变量`和`quality变量`是整型，其余11个变量均为数字。`residual.sugar变量`中最大值是15.5，而其第三四分位数仅为2.6，可以看做是异常值。同样可看做为异常值的还有`chlorides变量`、`free.sulfur.dioxide变量`、`total.sulfur.dioxide变量`、`density变量`、`sulphates变量`、`alcohol变量`和`quality变量`的最大值。
+
+## 该数据集中不同质量的酒的分布情况
+```{r}
+library(ggplot2)
+table(pf$quality)
+qplot(quality, data = pf)
+```
+评分为5分和6分的酒的数量明显多于其他评分的酒
+
+## 酒的质量与其他参数的关系
+### 质量与三种酸度（fixed.acidity、volatile.acidity、citric.acid）的关系
+```{r}
+library(gridExtra)
+p1_1 = ggplot(aes(quality, fixed.acidity), data = pf) +
+  geom_point(alpha = .1, color = 'red')
+p1_2 = ggplot(aes(quality, volatile.acidity), data = pf) +
+  geom_point(alpha = .1, color = 'blue')
+p1_3 = ggplot(aes(quality, citric.acid), data = pf) +
+  geom_point(alpha = .1, color = 'yellow')
+grid.arrange(p1_1, p1_2, p1_3, ncol = 3)
+```
+三种酸度与酒的质量并没有明显的线性关系。在不同质量的酒中，三种酸度的数值跨度都很大。但也可以看出，在质量评分为5和6分的九种，fixed.acidity的数值集中在 4-12 之间，volatile.acidity的数值集中在 0.2-0.8 之间，citric.acid的数值集中在 0.00-0.625 之间。
+
+### 质量与residual.sugar的关系
+```{r}
+ggplot(aes(quality, residual.sugar), data = pf) +
+  geom_point(alpha = .1)
+```
+从图上看，residual.sugar的数值大部分在1-4之间。重点查看一下评分5和6的酒的residual.sugar数值。
+```{r}
+summary(subset(pf, quality==5)$residual.sugar)
+summary(subset(pf, quality==6)$residual.sugar)
+p2_1 = ggplot(aes(quality, residual.sugar), 
+              data = subset(pf, quality==5)) +
+  geom_boxplot(color = 'red') +
+  coord_cartesian(ylim = c(1,4)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+p2_2 = ggplot(aes(quality, residual.sugar), 
+              data = subset(pf, quality==6)) +
+  geom_boxplot(color = 'blue') +
+  coord_cartesian(ylim = c(1,4)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+grid.arrange(p2_1, p2_2, ncol = 2)
+```
+可以看出，评分5和6的酒的residual.sugar的数值大部分在1-3.5之间，均值分别为2.529和2.477，第一四分位值和中位数完全一致。
+```{r}
+ggplot(aes(quality, residual.sugar), data = pf) +
+  coord_cartesian(ylim = c(quantile(pf$residual.sugar, .05), 
+                           quantile(pf$residual.sugar, .95))) +
+  scale_y_continuous(breaks = seq(quantile(pf$residual.sugar, .05),
+                                  quantile(pf$residual.sugar, .95),
+                                  .2)) +
+  geom_point(alpha = 0.1, color = 'orange') +
+  geom_line(stat = 'summary', fun.y = mean) +
+  geom_line(stat = 'summary', fun.y = quantile, fun.args = list(prob = .1),
+            linetype = 2, color = 'blue') +
+  geom_line(stat = 'summary', fun.y = quantile, fun.args = list(prob = .5),
+            color = 'blue') +
+  geom_line(stat = 'summary', fun.y = quantile, fun.args = list(prob = .9),
+            linetype = 2, color = 'blue')
+```
+不同质量的酒的residual.sugar数值，中位数的均值的变化比较平缓，但是第三四分位数的变化较大。可能是因为除了评分5和6的酒，其他分值的酒样本较少，第三四分位数受极值影响较大。
+
+### 质量与chlorides的关系
+```{r}
+library(reshape2)
+summary(dcast(subset(pf, quality==5 | quality==6), 
+              X~quality, value.var = 'chlorides'))
+ggplot(aes(quality, chlorides), data = subset(pf, quality==5 | quality==6)) +
+  facet_wrap(~quality) +
+  geom_boxplot() +
+  coord_cartesian(ylim = c(0.03, 0.15)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+```
+可以看出，评分5和6的酒的chlorides的数值大部分在0.04-0.12之间，均值分别为0.0927和0.0850，中位数分别为0.0810和0.0780。
+
+### 质量与free.sulfur.dioxide、total.sulfur.dioxide、sulphates的关系
+```{r}
+p3_1 = ggplot(aes(quality, free.sulfur.dioxide), data = pf) +
+  geom_point(alpha = .1, color = 'red')
+p3_2 = ggplot(aes(quality, total.sulfur.dioxide), data = pf) +
+  geom_point(alpha = .1, color = 'blue')
+p3_3 = ggplot(aes(quality, sulphates), data = pf) +
+  geom_point(alpha = .1, color = 'orange')
+grid.arrange(p3_1, p3_2, p3_3, ncol = 3)
+```
+重点查看评分为5和6的酒的free.sulfur.dioxide数据
+```{r}
+summary(dcast(subset(pf, quality==5 | quality==6), 
+              X~quality, value.var = 'free.sulfur.dioxide'))
+ggplot(aes(quality, free.sulfur.dioxide), 
+       data = subset(pf, quality==5 | quality==6)) +
+  facet_wrap(~quality) +
+  geom_boxplot() +
+  coord_cartesian(ylim = c(0, 50)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+```
+可以看出，评分5和6的酒的free.sulfur.dioxide数据大部分在1-40之间，均值分别为16.98和15.71，中位数分别为15和14。
+
+### 质量与density、pH、alcohol的关系
+```{r}
+p4_1 = ggplot(aes(quality, density), data = pf) +
+  geom_point(alpha = .1, color = 'red')
+p4_2 = ggplot(aes(quality, pH), data = pf) +
+  geom_point(alpha = .1, color = 'blue')
+p4_3 = ggplot(aes(quality, alcohol), data = pf) +
+  geom_point(alpha = .1, color = 'orange')
+grid.arrange(p4_1, p4_2, p4_3, ncol = 3)
+```
+评分5和6的酒，density和pH的数值分布较为接近。评分5的酒的alcohol值在9-11.5之间，评分6的酒的alcohol值在9-13之间。
+
+## 三种酸度之间的关系
+### fixed.acidity和volatile.acidity的关系
+```{r}
+ggplot(aes(fixed.acidity, volatile.acidity), data = pf) +
+  geom_point(alpha = .4) +
+  geom_smooth(method = 'lm', color = 'orange')
+
+with(pf, cor.test(fixed.acidity, volatile.acidity))
+```
+fixed.acidity和volatile.acidity之间存在较弱的负相关性
+
+### fixed.acidity和citric.acid的关系
+```{r}
+ggplot(aes(fixed.acidity, citric.acid), data = pf) +
+  geom_point(alpha = .4) +
+  geom_smooth(method = 'lm', color = 'orange')
+
+with(pf, cor.test(fixed.acidity, citric.acid))
+```
+fixed.acidity和citric.acid之间存在较强的正相关性
+
+### volatile.acidity和citric.acid的关系
+```{r}
+ggplot(aes(volatile.acidity, citric.acid), data = pf) +
+  geom_point(alpha = .4) +
+  coord_cartesian(ylim = c(0,1)) +
+  geom_smooth(method = 'lm', color = 'orange')
+
+with(pf, cor.test(volatile.acidity, citric.acid))
+```
+volatile.acidity和citric.acid之间存在较强的负相关性
+
+## free.sulfur.dioxide、total.sulfur.dioxide和sulphates之间的关系
+### free.sulfur.dioxide和total.sulfur.dioxide的关系
+```{r}
+ggplot(aes(free.sulfur.dioxide, total.sulfur.dioxide), data = pf) +
+  geom_point(alpha = .2)
+with(pf, cor.test(free.sulfur.dioxide, total.sulfur.dioxide))
+```
+free.sulfur.dioxide和total.sulfur.dioxide之间存在较强的正相关性
+
+### free.sulfur.dioxide、total.sulfur.dioxide和sulphates之间的关系
+```{r}
+p5_1 = ggplot(aes(0.25*round(sulphates/0.25), free.sulfur.dioxide), data = pf) +
+  geom_line(stat = 'summary', fun.y = mean, color = 'red')
+p5_2 = ggplot(aes(0.25*round(sulphates/0.25), total.sulfur.dioxide), data = pf) +
+  geom_line(stat = 'summary', fun.y = mean, color = 'blue')
+grid.arrange(p5_1, p5_2, ncol = 2)
+
+with(pf, cor.test(free.sulfur.dioxide, sulphates))
+with(pf, cor.test(total.sulfur.dioxide, sulphates))
+```
+从相关系数上看，free.sulfur.dioxide、total.sulfur.dioxide和sulphates之间并无相关性。在增加x轴（sulphates）的组距至0.25后发现，free.sulfur.dioxide和total.sulfur.dioxide在组距0.25时的均值随sulphates的增加而增加。
+
+## alcohol、residual.sugar和density的关系
+```{r}
+ggplot(aes(alcohol, density), data = pf) +
+  geom_point(alpha = .25, color = 'orange') +
+  geom_line(stat = 'summary', fun.y = mean) +
+  geom_line(stat = 'summary', fun.y = median, linetype = 2)
+
+with(pf, cor.test(alcohol, density))
+```
+alcohol与density之间存在中度负相关性。
+```{r}
+ggplot(aes(residual.sugar, density), data = pf) +
+  coord_cartesian(xlim = c(quantile(pf$residual.sugar, .01),
+                           quantile(pf$residual.sugar, .95))) +
+  geom_point(alpha = .25, color = 'orange') +
+  geom_line(stat = 'summary', fun.y = mean) +
+  geom_line(stat = 'summary', fun.y = median, linetype = 2)
+
+with(pf, cor.test(residual.sugar, density))
+```
+residual.sugar与density之间存在中度正相关性
+
+## pH值与酸度的关系
+### pH值与fixed.acidity、volatile.acidity、citric.acid的关系
+```{r}
+p6_1 = ggplot(aes(pH, fixed.acidity), data = pf) +
+  geom_point(alpha = .25, color = 'red')
+p6_2 = ggplot(aes(pH, volatile.acidity), data = pf) +
+  geom_point(alpha = .25, color = 'blue')
+p6_3 = ggplot(aes(pH, citric.acid), data = pf) +
+  geom_point(alpha = .25, color = 'orange')
+grid.arrange(p6_1, p6_2, p6_3, ncol = 2)
+
+with(pf, cor.test(pH, fixed.acidity))
+with(pf, cor.test(pH, volatile.acidity))
+with(pf, cor.test(pH, citric.acid))
+```
+fixed.acidity、volatile.acidity、citric.acid三项指标中，fixed.acidity与pH值的相关性最大，相关系数为-0.683。
+
+### 不同密度的酒的pH值与fixed.acidity的关系
+```{r}
+ggplot(aes(fixed.acidity, pH), data = pf) +
+  geom_point(aes(color = density))
+ggplot(aes(fixed.acidity, pH), data = pf) +  
+  geom_line(aes(color = density), stat = 'summary', fun.y = median)
+```
+可以看出，pH值的中位数随fixed.acidity值的增加而降低。密度较小的酒pH值一般较高，密度较大的酒一般pH值较低。
+
+## pH值与residual.sugar的关系
+```{r}
+ggplot(aes(residual.sugar, pH), data = pf) +
+  coord_cartesian(xlim = c(quantile(pf$residual.sugar, .05),
+                           quantile(pf$residual.sugar, .95))) +
+  geom_point(alpha = .5)
+
+with(pf, cor.test(residual.sugar, pH))
+```
+pH值与residual.sugar没有相关性。
+
+## 结论
+### 数据集中酒的质量的分布情况
+```{r}
+ggplot(aes(quality), data = pf) +
+  geom_histogram(binwidth = .5) +
+  scale_x_continuous(breaks = seq(3,8,1)) +
+  xlab('Quality Score') +
+  ylab('Number of Sample') +
+  labs(title = 'Distribution of Quality Score') +
+  theme(plot.title = element_text(hjust = 0.5)) #标题居中
+```
+样本中评分为5和6的酒的数量最多，数量远大于其他分值的酒。
+
+### 评分为5和6的样本中，residual.sugar数值的分布情况
+```{r}
+p2_1 = ggplot(aes(quality, residual.sugar), 
+              data = subset(pf, quality==5)) +
+  geom_boxplot(color = 'red') +
+  xlab('') +
+  ylab('') +
+  coord_cartesian(ylim = c(1,4)) +
+  scale_y_continuous(breaks = seq(1,4,.1)) +
+  scale_x_continuous(breaks = seq(4.5,5.5,.5)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+p2_2 = ggplot(aes(quality, residual.sugar), 
+              data = subset(pf, quality==6)) +
+  geom_boxplot(color = 'blue') +
+  xlab('') +
+  ylab('') +
+  coord_cartesian(ylim = c(1,4)) +
+  scale_y_continuous(breaks = seq(1,4,.1)) +
+  scale_x_continuous(breaks = seq(5.5,6.5,.5)) +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+grid.arrange(p2_1, p2_2, ncol = 2, 
+             left = 'Residual.sugar Value',
+             top = 'Distribution of Residual.sugar with Score 5 and 6',
+             bottom = 'Quality Score')
+```
+residual.sugar的数值大部分在1-3.5之间，均值分别为2.529和2.477，第一四分位值和中位数完全一致。
+
+### 不同密度的酒的pH值与fixed.acidity的关系
+```{r}
+ggplot(aes(fixed.acidity, pH), data = pf) +  
+  geom_line(aes(color = density), stat = 'summary', fun.y = median) +
+  scale_x_continuous(breaks = seq(6, 16, 2)) +
+  labs(x = 'Fixed.acidity Value',
+       y = 'pH Value',
+       title = 'Relationship of Fixed.acidity and pH with Different Density') +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+pH值的中位数随fixed.acidity值的增加而降低。密度较小的酒pH值一般较高，密度较大的酒一般pH值较低。
+
+## 反思
+开始时，我认为数据间会存在明显的相关性，但随着分析的深入，发现相关性并没有那么明显。例如，我在分析residual.sugar和pH的关系时，开始时认为residual.sugar的值越小，pH也应该越小，但通过分析发现，二者并没有相关性。
+在未来的分析中，应当注意不要在分析数据前就形成先入为主的想法，容易造成方向错误。
+
