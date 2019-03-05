@@ -16,31 +16,33 @@ library(ggplot2)
 
 ```{r echo=FALSE, Load_the_Data}
 # 加载数据
-?wineQualityReds
 pf = read.csv('wineQualityReds.csv')
 ```
 
 # 单变量绘图选择
 ```{r echo=FALSE, Univariate_Plots}
+# 查看数据集的基本信息
 str(pf)
 summary(pf)
 ```
 ```{r echo=FALSE}
-theme_set(theme_minimal(8))
+# 绘制fixed.acidity变量的直方图
+theme_set(theme_minimal(8)) # 调整数据集的主题（采用8号字体）
 
 ggplot(aes(fixed.acidity), data = pf) +
   geom_histogram(binwidth = .5) +
   scale_x_continuous(breaks = seq(4, 16, .5))
 
-theme_set(theme_minimal(4))
+theme_set(theme_minimal(5))
 ggplot(aes(fixed.acidity), data = pf) +
   geom_histogram(binwidth = .05) +
-  scale_x_log10(breaks = seq(4, 16, .5))
-summary(pf$fixed.acidity)
+  scale_x_log10(breaks = seq(4, 16, .5)) # 对x轴进行对数变换
+summary(pf$fixed.acidity) # 汇总fixed.acidity变量
 ```
 
 图形看起来有一些左偏，经过对数转换后近似于正态分布，峰值处于8.0左右。
 ```{r echo=FALSE}
+# 绘制volatile.acidity变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(volatile.acidity), data = pf) +
   geom_histogram(binwidth = .02)
@@ -48,6 +50,7 @@ ggplot(aes(volatile.acidity), data = pf) +
 
 图形显示出了两个峰值，分别在0.42和0.58附近
 ```{r echo=FALSE}
+# 绘制citric.acid变量的直方图
 ggplot(aes(citric.acid), data = pf) +
   geom_histogram(binwidth = .01)
 summary(pf$citric.acid)
@@ -55,6 +58,7 @@ summary(pf$citric.acid)
 
 数值0的数量最多，远高于其他数值。
 ```{r echo=FALSE}
+# 绘制residual.sugar变量的直方图
 ggplot(aes(residual.sugar), data = pf) +
   geom_histogram()
 theme_set(theme_minimal(4))
@@ -65,6 +69,7 @@ ggplot(aes(residual.sugar), data = pf) +
 
 图像显示为长尾型，经过对数转换后接近正态分布，峰值出现在2.25附近。
 ```{r echo=FALSE}
+# 绘制chlorides变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(chlorides), data = pf) +
   geom_histogram()
@@ -76,6 +81,7 @@ ggplot(aes(chlorides), data = pf) +
 
 图形为左偏长尾，经过对数转换后接近正态分布，峰值出现在0.08附近。
 ```{r echo=FALSE}
+# 绘制free.sulfur.dioxide变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(free.sulfur.dioxide), data = pf) +
   geom_histogram(binwidth = 3)
@@ -87,6 +93,7 @@ ggplot(aes(free.sulfur.dioxide), data = pf) +
 
 图形为左偏长尾，经过对数转换后接近双峰分布，峰值出现在6和16附近。
 ```{r echo=FALSE}
+# 绘制total.sulfur.dioxide变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(total.sulfur.dioxide), data = pf) +
   geom_histogram()
@@ -98,6 +105,7 @@ ggplot(aes(total.sulfur.dioxide), data = pf) +
 
 图形为左偏长尾，经过对数转换后接近正态分布，峰值出现在42附近。
 ```{r echo=FALSE}
+# 绘制density变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(density), data = pf) +
   geom_histogram()
@@ -106,6 +114,7 @@ summary(pf$density)
 
 图形接近正态分布，最小值0.9901，最大值1.0037，中位数0.9967，均值0.9978。
 ```{r echo=FALSE}
+# 绘制pH变量的直方图
 ggplot(aes(pH), data = pf) +
   geom_histogram()
 summary(pf$pH)
@@ -113,9 +122,9 @@ summary(pf$pH)
 
 图形接近正态分布，最小值2.74，最大值4.01，中位数3.31，均值3.311
 ```{r echo=FALSE}
+# 绘制sulphates变量的直方图
 ggplot(aes(sulphates), data = pf) +
   geom_histogram()
-theme_set(theme_minimal(4))
 ggplot(aes(sulphates), data = pf) +
   geom_histogram() +
   scale_x_log10(breaks = seq(0.5, 1, 0.1))
@@ -123,10 +132,10 @@ ggplot(aes(sulphates), data = pf) +
 
 图形为左偏长尾，经过对数转换后接近正态分布，峰值出现在0.6附近。
 ```{r echo=FALSE}
+# 绘制alcohol变量的直方图
 theme_set(theme_minimal(8))
 ggplot(aes(alcohol), data = pf) +
   geom_histogram()
-theme_set(theme_minimal(4))
 ggplot(aes(alcohol), data = pf) +
   geom_histogram() +
   scale_x_log10(breaks = seq(9, 10, .2))
@@ -134,7 +143,7 @@ ggplot(aes(alcohol), data = pf) +
 
 图形为左偏，经过对数转换后依然左偏，峰值出现在9.5附近。
 ```{r echo=FALSE}
-theme_set(theme_minimal(8))
+# 绘制quality变量的直方图
 ggplot(aes(quality), data = pf) +
   geom_histogram(binwidth = .5) +
   scale_x_continuous(breaks = seq(3, 8, 1))
@@ -162,6 +171,7 @@ volatile.acidity，citric.acid等特性存在异常值，我会在坐标轴上�
 
 # 双变量绘图选择
 ```{r echo=FALSE, Bivariate_Plots, fig.height=12, fig.width=12, message=FALSE, warning=FALSE}
+# 绘制散点矩阵图
 library('GGally')
 theme_set(theme_minimal(4))
 set.seed(10)
@@ -169,9 +179,10 @@ ggpairs(pf[sample.int(nrow(pf), 1000), ])
 ```
 
 通过上图发现，quality与其他特性并没有很强的相关性，只与alcohol特性存在中度的正相关性。
-```{r}
+```{r echo=FALSE}
+# 绘制volatile.acidity变量与quality变量的散点图和箱线图
 theme_set(theme_minimal(8))
-pf$quality = factor(pf$quality)
+pf$quality = factor(pf$quality) # 将quality变量由num型转变为factor型
 ggplot(aes(quality, volatile.acidity), data = pf) +
   geom_jitter(alpha = .25) +
   geom_boxplot(alpha = .25, color = 'blue') +
@@ -180,7 +191,8 @@ ggplot(aes(quality, volatile.acidity), data = pf) +
 ```
 
 不同评分的酒，均含有相同的volatile.acidity数值，没有体现出明显的相关性。在质量评分为5分的酒中，volatile.acidity的数值集中在0.45-0.65之间；在质量评分为6分的酒中，volatile.acidity的数值集中在0.4-0.6之间。
-```{r}
+```{r echo=FALSE}
+# 绘制citric.acid变量和quality变量的散点图和箱线图
 ggplot(aes(quality, citric.acid), data = pf) +
   geom_point(alpha = .25, position = position_jitter(h=0)) +
   geom_boxplot(alpha = .25, color = 'blue') +
@@ -189,7 +201,8 @@ ggplot(aes(quality, citric.acid), data = pf) +
 ```
 
 不同评分的酒，均含有相同的citric.acid数值，没有体现出明显的相关性。在质量评分为5分的酒中，citric.acid的数值集中在0.09-0.35之间；在质量评分为6分的酒中，citric.acid的数值集中在0.08-0.43之间。
-```{r}
+```{r echo=FALSE}
+# 绘制residual.sugar变量和quality变量的散点图和箱线图
 ggplot(aes(quality, residual.sugar), data = pf) +
   geom_jitter(alpha = .1) +
   geom_boxplot(alpha = .1, color = 'blue') +
@@ -200,8 +213,9 @@ summary(subset(pf, pf$quality==6)$residual.sugar)
 ```
 
 不同评分的酒，均含有相同的residual.sugar数值，没有体现出明显的相关性。在质量评分为5分的酒中，residual.sugar的数值集中在1.9-2.6之间；在质量评分为6分的酒中，residual.sugar的数值集中在1.9-2.5之间。
-```{r}
-pf$quality = as.numeric(levels(pf$quality))[pf$quality]
+```{r echo=FALSE}
+# 绘制residual.sugar变量和quality变量的散点图并添加汇总后的折线图
+pf$quality = as.numeric(levels(pf$quality))[pf$quality] # 将quality变量由factor型转换为num型，并保持数值不变
 ggplot(aes(quality, residual.sugar), data = pf) +
   coord_cartesian(ylim = c(quantile(pf$residual.sugar, .05), 
                            quantile(pf$residual.sugar, .95))) +
@@ -219,7 +233,8 @@ ggplot(aes(quality, residual.sugar), data = pf) +
 ```
 
 不同质量的酒的residual.sugar数值，中位数的均值的变化比较平缓，但是第三四分位数的变化较大。可能是因为除了评分5和6的酒，其他分值的酒样本较少，第三四分位数受极值影响较大。
-```{r}
+```{r echo=FALSE}
+# 绘制total.sulfur.dioxide变量和quality变量的散点图和箱线图
 pf$quality = factor(pf$quality)
 ggplot(aes(quality, total.sulfur.dioxide), data = pf) +
   geom_jitter(alpha = .1) +
@@ -230,19 +245,21 @@ ggplot(aes(quality, total.sulfur.dioxide), data = pf) +
 
 library(reshape2)
 summary(dcast(subset(pf, quality==5 | quality==6), 
-              X~quality, value.var = 'total.sulfur.dioxide'))
+              X~quality, value.var = 'total.sulfur.dioxide')) # 将长数据转换为宽数据，再进行汇总
 ```
 
 不同评分的酒，均含有相同的total.sulfur.dioxide数值，没有体现出明显的相关性。在质量评分为5分的酒中，total.sulfur.dioxide的数值集中在26-84之间，均值和中位数分别为56.51和47；在质量评分为6分的酒中，total.sulfur.dioxide的数值集中在23-54之间，均值和中位数分别为40.87和35。
-```{r}
+```{r echo=FALSE}
+# 绘制fixed.acidity变量和volatile.acidity变量的散点图，并添加平滑器
 ggplot(aes(fixed.acidity, volatile.acidity), data = pf) +
   geom_point(alpha = .4) +
   geom_smooth(method = 'lm', color = 'orange')
-with(pf, cor.test(fixed.acidity, volatile.acidity))
+with(pf, cor.test(fixed.acidity, volatile.acidity)) #计算fixed.acidity变量和volatile.acidity变量的相关系数
 ```
 
 fixed.acidity和volatile.acidity之间存在较弱的负相关性
-```{r}
+```{r echo=FALSE}
+# 绘制fixed.acidity变量和citric.acid变量的散点图，并添加平滑器
 ggplot(aes(fixed.acidity, citric.acid), data = pf) +
   geom_point(alpha = .4) +
   geom_smooth(method = 'lm', color = 'orange')
@@ -250,7 +267,8 @@ with(pf, cor.test(fixed.acidity, citric.acid))
 ```
 
 fixed.acidity和citric.acid之间存在较强的正相关性
-```{r}
+```{r echo=FALSE}
+# 绘制volatile.acidity变量和citric.acid变量的散点图，并添加平滑器
 ggplot(aes(volatile.acidity, citric.acid), data = pf) +
   geom_point(alpha = .4) +
   coord_cartesian(ylim = c(0,1)) +
@@ -259,14 +277,16 @@ with(pf, cor.test(volatile.acidity, citric.acid))
 ```
 
 volatile.acidity和citric.acid之间存在较强的负相关性
-```{r}
+```{r echo=FALSE}
+# 绘制free.sulfur.dioxide变量和total.sulfur.dioxide变量的散点图
 ggplot(aes(free.sulfur.dioxide, total.sulfur.dioxide), data = pf) +
   geom_point(alpha = .2)
 with(pf, cor.test(free.sulfur.dioxide, total.sulfur.dioxide))
 ```
 
 free.sulfur.dioxide和total.sulfur.dioxide之间存在较强的正相关性
-```{r}
+```{r echo=FALSE}
+# 绘制free.sulfur.dioxide变量和total.sulfur.dioxide变量的散点图
 ggplot(aes(fixed.acidity, pH), data = pf) +
   geom_point(alpha = .2)
 with(pf, cor.test(fixed.acidity, pH))
@@ -289,21 +309,27 @@ fixed.acidity，volatile.acidity，citric.acid之间存在明显的相关性；f
 # 多变量绘图选择
 
 ```{r echo=FALSE, Multivariate_Plots}
+# 绘制fixed.acidity变量和pH变量按quality变量颜色分类的散点图
 theme_set(theme_minimal(8))
 ggplot(aes(fixed.acidity, pH), data = pf) +
-  geom_point(aes(color = quality))
+  geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'seq')
 ```
 
 可以看出，pH值随fixed.acidity值的增加呈下降趋势。
-```{r}
+```{r echo=FALSE}
+# 绘制free.sulfur.dioxide变量和total.sulfur.dioxide变量按quality变量颜色分类的散点图
 ggplot(aes(free.sulfur.dioxide, total.sulfur.dioxide), data = pf) +
-  geom_point(aes(color = quality))
+  geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'div')
 ```
 
 可以看出，total.sulfur.dioxiede值随free.sulfur.dioxiede值的增加呈上升趋势。
-```{r}
+```{r echo=FALSE}
+# 绘制volatile.acidity变量和citric.acid变量按quality变量颜色分类的散点图
 ggplot(aes(volatile.acidity, citric.acid), data = pf) +
-  geom_point(aes(color = quality))
+  geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'seq')
 ```
 
 可以看出，citric.acid值随volatile.acidity值的增加呈下降趋势。
@@ -324,8 +350,10 @@ ggplot(aes(volatile.acidity, citric.acid), data = pf) +
 
 ### 绘图一
 ```{r echo=FALSE, Plot_One}
+# 绘制free.sulfur.dioxide变量和total.sulfur.dioxide变量按quality变量颜色分类的散点图
 ggplot(aes(free.sulfur.dioxide, total.sulfur.dioxide), data = pf) +
   geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'div') +
   xlab('free sulfur dioxide (mg / dm^3)') +
   ylab('total sulfur dioxide (mg / dm^3)') +
   labs(title = 'Scatterplot between free.sulfur.dioxide and total.sulfur.dioxide with colored quality levels') +
@@ -337,8 +365,10 @@ ggplot(aes(free.sulfur.dioxide, total.sulfur.dioxide), data = pf) +
 
 ### 绘图二
 ```{r echo=FALSE, Plot_Two}
+# 绘制volatile.acidity变量和citric.acid变量按quality变量颜色分类的散点图
 ggplot(aes(volatile.acidity, citric.acid), data = pf) +
   geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'seq') +
   xlab('volatile acidity (acetic acid - g / dm^3)') +
   ylab('citric acid (g / dm^3)') +
   labs(title = 'Scatterplot between volatile.acidity and citric.acid with colored quality levels') +
@@ -350,8 +380,10 @@ ggplot(aes(volatile.acidity, citric.acid), data = pf) +
 
 ### 绘图三
 ```{r echo=FALSE, Plot_Three}
+# 绘制fixed.acidity变量和pH变量按quality变量颜色分类的散点图
 ggplot(aes(fixed.acidity, pH), data = pf) +
   geom_point(aes(color = quality)) +
+  scale_color_brewer(type = 'seq') +
   labs(x = 'fixed acidity (tartaric acid - g / dm^3)',
        y = 'pH',
        title = 'Scatterplot between fixed.acidity and pH with colored quality levels') +
